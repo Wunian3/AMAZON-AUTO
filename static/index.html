@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AMAZON-AUTO · 补货与采购</title><link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/">A<span>AMAZON-AUTO</span></a><span class="tag">EXCEL 工作台 · 第一版</span></header>
+  <main>
+    <section class="hero"><p class="eyebrow">库存有数，补货有据</p><h1>从一份报表，到下一步行动。</h1><p>分开核算 FBA 发货与供应商采购，保留每一步供给扣减明细。</p></section>
+    <section class="card upload-card"><div><span class="step">01</span><h2>上传补货工作簿</h2><p>支持你提供的多工作表格式，日期后缀可变化。文件在内存中处理，不保存到服务器磁盘。</p></div><label class="upload">选择 Excel 文件<input id="file" type="file" accept=".xlsx"></label><p id="file-info" role="status">请选择 .xlsx 文件，最大 20 MB</p><details><summary>本版需要哪些工作表？</summary><p>货件补货计算、FBA库存明细、listing报告为必需；计划单、厂家已出/未出、已创数据为可选。当前按原样表的表头识别，暂不支持任意后台格式或多个独立文件合并。</p></details><div id="sheets"></div></section>
+    <section class="card"><div class="section-title"><span class="step">02</span><h2>确认核算参数</h2><span class="subtle">天数是可修改的初始假设</span></div>
+      <div class="grid">
+        <label>销量 / 库存店铺<select id="shop"><option value="">上传后选择</option></select></label>
+        <label>日销口径<select id="sales_basis"><option>7日均销量</option><option>30日均销量</option><option>昨日销量</option><option>预期日销</option></select></label>
+        <label>数据所属日期<input id="as_of" type="date" required></label>
+        <label>生产周期（天）<input id="production_days" type="number" min="0" max="730" value="45"></label>
+        <label>运输及上架（天）<input id="shipping_days" type="number" min="0" max="730" value="50"></label>
+        <label>覆盖天数规则<select id="coverage_mode"><option value="tiered">按销量分档：80 / 90 / 100 天</option><option value="manual">手动指定覆盖天数</option></select></label>
+        <label>手动覆盖天数（手动模式生效）<input id="target_days" type="number" min="1" max="730" value="80" disabled></label>
+        <label>安全库存（天）<input id="safety_days" type="number" min="0" max="730" value="7"></label>
+        <label>计划单的店铺名称<input id="plan_store" placeholder="例如：JM美国" value="JM美国"></label>
+      </div>
+      <p>已确认口径：“已完成”为国内仓尚未发往FBA的现货。厂家已出/未出是袋子数据，不参与本次计算。销量分档沿用原表：日销&gt;49为100天，&gt;19为90天，其余80天。</p>
+      <label class="check"><input id="data_confirmed" type="checkbox">我已核实本次库存、销量为同日快照，计划单为当前结余，可以生成正式建议。</label>
+      <p class="notice">在途按状态取较大值估计，尚未用货件编号精确去重。请先复核库存口径，再用于下单。未确认时，正式发货和采购建议保持空白。</p>
+      <button id="calculate" disabled>计算补货与采购 <span>→</span></button><p id="message" role="status" aria-live="polite"></p>
+    </section>
+    <section id="output" hidden>
+      <div class="result-title"><div><p class="eyebrow">本次核算</p><h2>把缺口与可执行数量分开看</h2></div><button id="download" class="secondary">导出核算 Excel ↓</button></div>
+      <div class="metrics"><article><span>参与核算商品</span><strong id="count">—</strong></article><article><span>待确认 / 数据错误商品</span><strong id="pending">—</strong></article><article><span>正式建议 FBA 发货 / 件</span><strong id="ship-count">—</strong></article><article><span>正式建议采购 / 件</span><strong id="buy-count">—</strong></article></div>
+      <section class="card"><div class="table-head"><h2>补货与采购明细</h2><input id="search" type="search" placeholder="搜索 SKU、FNSKU 或产品" aria-label="搜索商品"></div><p>“FBA补货需求量”是需求缺口；“建议FBA发货量”受国内现货整箱数量限制。空白表示条件尚未确认，不等于零。</p><div id="results" class="table-wrap"></div></section>
+      <section class="card"><h2>需要你处理的数据</h2><div id="issues" class="table-wrap"></div></section>
+      <section class="card"><h2>已创建货件：装箱核对</h2><p>样表缺少可逐行关联的货件编号和实际接收数量。此处先核对“单箱数量 × 箱数”和登记总数量，不能判定亚马逊短收。</p><div id="shipments" class="table-wrap"></div></section>
+      <section class="card"><h2>计算口径</h2><ol id="assumptions"></ol></section>
+    </section>
+  </main><footer>AMAZON-AUTO · 上传、核算、导出 · 不自动采购或创建货件</footer>
+</body></html>
